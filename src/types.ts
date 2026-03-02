@@ -10,6 +10,7 @@ export interface CalculatorState {
   darkMode: boolean;
   isManualSalePrice: boolean;
   isForecastExpanded: boolean;
+  isMarginForecastExpanded: boolean;
 }
 
 export const DEFAULT_STATE: CalculatorState = {
@@ -24,4 +25,5 @@ export const DEFAULT_STATE: CalculatorState = {
   darkMode: false,
   isManualSalePrice: false,
   isForecastExpanded: true,
+  isMarginForecastExpanded: true,
 };

@@ -49,7 +49,10 @@ export default function App() {
   const amazonTaxAmount = useMemo(() => (state.amazonPrice * state.amazonTaxPercent) / 100, [state.amazonPrice, state.amazonTaxPercent]);
   const amazonTotalCost = useMemo(() => state.amazonPrice + amazonTaxAmount, [state.amazonPrice, amazonTaxAmount]);
 
-  const effectiveAmazonCost = state.autoImportAmazon ? amazonTotalCost : state.manualAmazonCost;
+  const effectiveAmazonCost = useMemo(() => {
+    const rawCost = state.autoImportAmazon ? amazonTotalCost : state.manualAmazonCost;
+    return Math.round((rawCost + Number.EPSILON) * 100) / 100;
+  }, [state.autoImportAmazon, amazonTotalCost, state.manualAmazonCost]);
 
   // Breakeven Calculation
   const calculateBreakeven = () => {
@@ -105,6 +108,29 @@ export default function App() {
       };
     });
   }, [state.ebaySalePrice, state.ebayFeePercent, effectiveAmazonCost, ebayFeeAmount, fixedFee]);
+
+  const marginForecast = useMemo(() => {
+    const margins = [5, 10, 15, 20, 30, 40, 50];
+    const cost = effectiveAmazonCost;
+    const fixedFee = 0.40;
+    const variableFeePercent = state.ebayFeePercent + (state.isPromoted ? state.promotedPercent : 0);
+
+    return margins.map(targetMargin => {
+      // Formula: S = (Cost + FixedFee) / (1 - VariableFee% - TargetMargin%)
+      const denominator = 1 - (variableFeePercent / 100) - (targetMargin / 100);
+      
+      if (denominator <= 0) return { margin: targetMargin, salePrice: 0, profit: 0 };
+      
+      const salePrice = (cost + fixedFee) / denominator;
+      const profit = salePrice * (targetMargin / 100);
+      
+      return {
+        margin: targetMargin,
+        salePrice,
+        profit
+      };
+    });
+  }, [effectiveAmazonCost, state.ebayFeePercent, state.isPromoted, state.promotedPercent]);
 
   const handleReset = () => {
     setState({ ...DEFAULT_STATE, darkMode: state.darkMode });
@@ -396,6 +422,73 @@ export default function App() {
                                 className="opacity-0 group-hover:opacity-100 text-[10px] font-bold uppercase tracking-wider bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-1 rounded transition-all hover:bg-indigo-100 dark:hover:bg-indigo-900/50"
                               >
                                 Apply
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </section>
+
+          {/* Target Margin Forecast Section */}
+          <section className="bg-white dark:bg-neutral-900 rounded-2xl p-6 shadow-sm border border-neutral-200 dark:border-neutral-800">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-emerald-500" />
+                <h2 className="text-lg font-semibold">Target Margin Forecast</h2>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="hidden sm:block text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
+                  Required sale price for profit
+                </div>
+                <button 
+                  onClick={() => updateState('isMarginForecastExpanded', !state.isMarginForecastExpanded)}
+                  className="p-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+                >
+                  {state.isMarginForecastExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <AnimatePresence>
+              {state.isMarginForecastExpanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-neutral-100 dark:border-neutral-800">
+                          <th className="py-3 px-2 text-[10px] uppercase tracking-wider font-bold text-neutral-400">Target Margin</th>
+                          <th className="py-3 px-2 text-[10px] uppercase tracking-wider font-bold text-neutral-400">Required Sale Price</th>
+                          <th className="py-3 px-2 text-[10px] uppercase tracking-wider font-bold text-neutral-400">Net Profit</th>
+                          <th className="py-3 px-2 text-[10px] uppercase tracking-wider font-bold text-neutral-400">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-50 dark:divide-neutral-800/50">
+                        {marginForecast.map((item) => (
+                          <tr key={item.margin} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors group">
+                            <td className="py-3 px-2 font-mono text-sm font-bold text-emerald-600 dark:text-emerald-400">{item.margin}%</td>
+                            <td className="py-3 px-2 font-mono text-sm font-bold text-neutral-900 dark:text-neutral-100">
+                              {item.salePrice > 0 ? `$${item.salePrice.toFixed(2)}` : 'N/A'}
+                            </td>
+                            <td className="py-3 px-2 font-mono text-sm text-emerald-500">
+                              {item.profit > 0 ? `$${item.profit.toFixed(2)}` : 'N/A'}
+                            </td>
+                            <td className="py-3 px-2">
+                              <button 
+                                disabled={item.salePrice <= 0}
+                                onClick={() => setState(prev => ({ ...prev, ebaySalePrice: parseFloat(item.salePrice.toFixed(2)), isManualSalePrice: true, isMarginForecastExpanded: false }))}
+                                className="opacity-0 group-hover:opacity-100 text-[10px] font-bold uppercase tracking-wider bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded transition-all hover:bg-emerald-100 dark:hover:bg-emerald-900/50 disabled:opacity-0"
+                              >
+                                Apply Price
                               </button>
                             </td>
                           </tr>
