@@ -12,7 +12,9 @@ import {
   Percent,
   ArrowRightLeft,
   Check,
-  Package
+  Package,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CalculatorState, DEFAULT_STATE } from './types';
@@ -49,6 +51,37 @@ export default function App() {
 
   const effectiveAmazonCost = state.autoImportAmazon ? amazonTotalCost : state.manualAmazonCost;
 
+  // Breakeven Calculation
+  const calculateBreakeven = () => {
+    const cost = effectiveAmazonCost;
+    const fixedFee = 0.40;
+    const totalFeePercent = state.ebayFeePercent + (state.isPromoted ? state.promotedPercent : 0);
+    
+    if (totalFeePercent >= 100) return 0;
+    
+    const breakeven = (cost + fixedFee) / (1 - totalFeePercent / 100);
+    return Math.max(0, breakeven);
+  };
+
+  // Auto-update eBay Sale Price to Breakeven when Amazon Price or Fees change
+  useEffect(() => {
+    if (state.isManualSalePrice) return;
+    
+    const breakeven = calculateBreakeven();
+    if (breakeven > 0) {
+      setState(prev => ({ ...prev, ebaySalePrice: parseFloat(breakeven.toFixed(2)) }));
+    }
+  }, [
+    state.amazonPrice, 
+    state.amazonTaxPercent, 
+    state.autoImportAmazon, 
+    state.manualAmazonCost, 
+    state.ebayFeePercent, 
+    state.isPromoted, 
+    state.promotedPercent,
+    state.isManualSalePrice
+  ]);
+
   const ebayFeeAmount = useMemo(() => (state.ebaySalePrice * state.ebayFeePercent) / 100, [state.ebaySalePrice, state.ebayFeePercent]);
   const promotedFeeAmount = useMemo(() => state.isPromoted ? (state.ebaySalePrice * state.promotedPercent) / 100 : 0, [state.ebaySalePrice, state.isPromoted, state.promotedPercent]);
   const fixedFee = 0.40;
@@ -56,6 +89,22 @@ export default function App() {
   const totalFees = useMemo(() => ebayFeeAmount + promotedFeeAmount + fixedFee, [ebayFeeAmount, promotedFeeAmount, fixedFee]);
   const netProfit = useMemo(() => state.ebaySalePrice - effectiveAmazonCost - totalFees, [state.ebaySalePrice, effectiveAmazonCost, totalFees]);
   const profitMargin = useMemo(() => state.ebaySalePrice > 0 ? (netProfit / state.ebaySalePrice) * 100 : 0, [netProfit, state.ebaySalePrice]);
+
+  const promotionForecast = useMemo(() => {
+    const percentages = Array.from({ length: 13 }, (_, i) => i + 1);
+    return percentages.map(percent => {
+      const pFee = (state.ebaySalePrice * percent) / 100;
+      const tFees = ebayFeeAmount + pFee + fixedFee;
+      const nProfit = state.ebaySalePrice - effectiveAmazonCost - tFees;
+      const pMargin = state.ebaySalePrice > 0 ? (nProfit / state.ebaySalePrice) * 100 : 0;
+      return {
+        percent,
+        totalFees: tFees,
+        netProfit: nProfit,
+        profitMargin: pMargin
+      };
+    });
+  }, [state.ebaySalePrice, state.ebayFeePercent, effectiveAmazonCost, ebayFeeAmount, fixedFee]);
 
   const handleReset = () => {
     setState({ ...DEFAULT_STATE, darkMode: state.darkMode });
@@ -120,7 +169,10 @@ export default function App() {
                   <input 
                     type="number" 
                     value={state.amazonPrice || ''} 
-                    onChange={(e) => updateState('amazonPrice', parseFloat(e.target.value) || 0)}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value) || 0;
+                      setState(prev => ({ ...prev, amazonPrice: val, isManualSalePrice: false }));
+                    }}
                     placeholder="0.00"
                     className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-transparent focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
                   />
@@ -196,13 +248,19 @@ export default function App() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">eBay Sale Price</label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">eBay Sale Price</label>
+                    <span className="text-[10px] font-bold text-blue-500 uppercase tracking-wider">Breakeven Auto-Calc</span>
+                  </div>
                   <div className="relative">
                     <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
                     <input 
                       type="number" 
                       value={state.ebaySalePrice || ''} 
-                      onChange={(e) => updateState('ebaySalePrice', parseFloat(e.target.value) || 0)}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value) || 0;
+                        setState(prev => ({ ...prev, ebaySalePrice: val, isManualSalePrice: true }));
+                      }}
                       placeholder="0.00"
                       className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-transparent focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     />
@@ -280,6 +338,74 @@ export default function App() {
                 </div>
               </div>
             </div>
+          </section>
+
+          {/* Promotion Forecast Section */}
+          <section className="bg-white dark:bg-neutral-900 rounded-2xl p-6 shadow-sm border border-neutral-200 dark:border-neutral-800">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-indigo-500" />
+                <h2 className="text-lg font-semibold">Promotion Forecast (1-13%)</h2>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="hidden sm:block text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
+                  Based on current sale price
+                </div>
+                <button 
+                  onClick={() => updateState('isForecastExpanded', !state.isForecastExpanded)}
+                  className="p-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+                >
+                  {state.isForecastExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <AnimatePresence>
+              {state.isForecastExpanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-neutral-100 dark:border-neutral-800">
+                          <th className="py-3 px-2 text-[10px] uppercase tracking-wider font-bold text-neutral-400">Rate</th>
+                          <th className="py-3 px-2 text-[10px] uppercase tracking-wider font-bold text-neutral-400">Total Fees</th>
+                          <th className="py-3 px-2 text-[10px] uppercase tracking-wider font-bold text-neutral-400">Net Profit</th>
+                          <th className="py-3 px-2 text-[10px] uppercase tracking-wider font-bold text-neutral-400">Margin</th>
+                          <th className="py-3 px-2 text-[10px] uppercase tracking-wider font-bold text-neutral-400">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-50 dark:divide-neutral-800/50">
+                        {promotionForecast.map((item) => (
+                          <tr key={item.percent} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors group">
+                            <td className="py-3 px-2 font-mono text-sm font-bold text-indigo-600 dark:text-indigo-400">{item.percent}%</td>
+                            <td className="py-3 px-2 font-mono text-sm text-neutral-500">${item.totalFees.toFixed(2)}</td>
+                            <td className={`py-3 px-2 font-mono text-sm font-bold ${item.netProfit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                              ${item.netProfit.toFixed(2)}
+                            </td>
+                            <td className={`py-3 px-2 font-mono text-sm ${item.netProfit >= 0 ? 'text-emerald-600/60' : 'text-rose-600/60'}`}>
+                              {item.profitMargin.toFixed(2)}%
+                            </td>
+                            <td className="py-3 px-2">
+                              <button 
+                                onClick={() => setState(prev => ({ ...prev, isPromoted: true, promotedPercent: item.percent, isForecastExpanded: false }))}
+                                className="opacity-0 group-hover:opacity-100 text-[10px] font-bold uppercase tracking-wider bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-1 rounded transition-all hover:bg-indigo-100 dark:hover:bg-indigo-900/50"
+                              >
+                                Apply
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </section>
         </div>
 

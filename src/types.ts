@@ -8,6 +8,8 @@ export interface CalculatorState {
   autoImportAmazon: boolean;
   manualAmazonCost: number;
   darkMode: boolean;
+  isManualSalePrice: boolean;
+  isForecastExpanded: boolean;
 }
 
 export const DEFAULT_STATE: CalculatorState = {
@@ -20,4 +22,6 @@ export const DEFAULT_STATE: CalculatorState = {
   autoImportAmazon: true,
   manualAmazonCost: 0,
   darkMode: false,
+  isManualSalePrice: false,
+  isForecastExpanded: true,
 };
