@@ -1,15 +1,44 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Cormorant Garamond", serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-gold-50: #fbf8f1;
+  --color-gold-100: #f5eedb;
+  --color-gold-200: #ead9b3;
+  --color-gold-300: #dabf82;
+  --color-gold-400: #c5a059;
+  --color-gold-500: #b38b45;
+  --color-gold-600: #9a723a;
+  --color-gold-700: #815c33;
+  --color-gold-800: #6b4d2f;
+  --color-gold-900: #5a422b;
+  --color-gold-950: #342518;
 }
 
 @layer base {
+  body {
+    @apply antialiased selection:bg-gold-200 selection:text-gold-900;
+  }
+  
   input[type="number"]::-webkit-inner-spin-button,
   input[type="number"]::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
   }
+}
+
+.luxury-card {
+  @apply bg-white dark:bg-[#1A1A1A] border border-gold-100 dark:border-gold-900/30 shadow-[0_4px_20px_rgba(179,139,69,0.05)] rounded-none;
+}
+
+.luxury-input {
+  @apply w-full pl-9 pr-4 py-3 bg-transparent border-b border-gold-200 dark:border-gold-800 focus:border-gold-500 dark:focus:border-gold-400 outline-none transition-all font-sans text-sm tracking-tight;
+}
+
+.luxury-label {
+  @apply text-[10px] uppercase tracking-[0.2em] font-bold text-gold-700 dark:text-gold-400 mb-2 block;
 }

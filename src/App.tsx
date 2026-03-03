@@ -17,7 +17,9 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { CalculatorState, DEFAULT_STATE } from './types';
+import { CalculatorState, DEFAULT_STATE, EbayStoreType } from './types';
+import { US_STATES } from './constants/states';
+import { EBAY_STORES } from './constants/ebay';
 
 export default function App() {
   const [state, setState] = useState<CalculatorState>(() => {
@@ -49,6 +51,11 @@ export default function App() {
   const amazonTaxAmount = useMemo(() => (state.amazonPrice * state.amazonTaxPercent) / 100, [state.amazonPrice, state.amazonTaxPercent]);
   const amazonTotalCost = useMemo(() => state.amazonPrice + amazonTaxAmount, [state.amazonPrice, amazonTaxAmount]);
 
+  const currentFixedFee = useMemo(() => {
+    if (!state.hasEbayStore) return 0.40;
+    return EBAY_STORES[state.ebayStoreType].fixedFee;
+  }, [state.hasEbayStore, state.ebayStoreType]);
+
   const effectiveAmazonCost = useMemo(() => {
     const rawCost = state.autoImportAmazon ? amazonTotalCost : state.manualAmazonCost;
     return Math.round((rawCost + Number.EPSILON) * 100) / 100;
@@ -57,7 +64,7 @@ export default function App() {
   // Breakeven Calculation
   const calculateBreakeven = () => {
     const cost = effectiveAmazonCost;
-    const fixedFee = 0.40;
+    const fixedFee = currentFixedFee;
     const totalFeePercent = state.ebayFeePercent + (state.isPromoted ? state.promotedPercent : 0);
     
     if (totalFeePercent >= 100) return 0;
@@ -87,7 +94,7 @@ export default function App() {
 
   const ebayFeeAmount = useMemo(() => (state.ebaySalePrice * state.ebayFeePercent) / 100, [state.ebaySalePrice, state.ebayFeePercent]);
   const promotedFeeAmount = useMemo(() => state.isPromoted ? (state.ebaySalePrice * state.promotedPercent) / 100 : 0, [state.ebaySalePrice, state.isPromoted, state.promotedPercent]);
-  const fixedFee = 0.40;
+  const fixedFee = currentFixedFee;
 
   const totalFees = useMemo(() => ebayFeeAmount + promotedFeeAmount + fixedFee, [ebayFeeAmount, promotedFeeAmount, fixedFee]);
   const netProfit = useMemo(() => state.ebaySalePrice - effectiveAmazonCost - totalFees, [state.ebaySalePrice, effectiveAmazonCost, totalFees]);
@@ -97,7 +104,7 @@ export default function App() {
     const percentages = Array.from({ length: 13 }, (_, i) => i + 1);
     return percentages.map(percent => {
       const pFee = (state.ebaySalePrice * percent) / 100;
-      const tFees = ebayFeeAmount + pFee + fixedFee;
+      const tFees = ebayFeeAmount + pFee + currentFixedFee;
       const nProfit = state.ebaySalePrice - effectiveAmazonCost - tFees;
       const pMargin = state.ebaySalePrice > 0 ? (nProfit / state.ebaySalePrice) * 100 : 0;
       return {
@@ -107,12 +114,12 @@ export default function App() {
         profitMargin: pMargin
       };
     });
-  }, [state.ebaySalePrice, state.ebayFeePercent, effectiveAmazonCost, ebayFeeAmount, fixedFee]);
+  }, [state.ebaySalePrice, state.ebayFeePercent, effectiveAmazonCost, ebayFeeAmount, currentFixedFee]);
 
   const marginForecast = useMemo(() => {
     const margins = [5, 10, 15, 20, 30, 40, 50];
     const cost = effectiveAmazonCost;
-    const fixedFee = 0.40;
+    const fixedFee = currentFixedFee;
     const variableFeePercent = state.ebayFeePercent + (state.isPromoted ? state.promotedPercent : 0);
 
     return margins.map(targetMargin => {
@@ -187,7 +194,7 @@ export default function App() {
               <h2 className="text-lg font-semibold">Amazon Sales Tax</h2>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Product Price (USD)</label>
                 <div className="relative">
@@ -205,13 +212,41 @@ export default function App() {
                 </div>
               </div>
               <div className="space-y-2">
+                <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">State Filter</label>
+                <select 
+                  value={state.selectedState}
+                  onChange={(e) => {
+                    const stateName = e.target.value;
+                    const selected = US_STATES.find(s => s.name === stateName);
+                    if (selected) {
+                      setState(prev => ({ 
+                        ...prev, 
+                        selectedState: stateName, 
+                        amazonTaxPercent: selected.rate 
+                      }));
+                    } else {
+                      updateState('selectedState', '');
+                    }
+                  }}
+                  className="w-full px-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-transparent focus:ring-2 focus:ring-emerald-500 outline-none transition-all appearance-none"
+                >
+                  <option value="">Select State</option>
+                  {US_STATES.map(s => (
+                    <option key={s.name} value={s.name}>{s.name} ({s.rate}%)</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
                 <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Sales Tax (%)</label>
                 <div className="relative">
                   <Percent className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
                   <input 
                     type="number" 
                     value={state.amazonTaxPercent || ''} 
-                    onChange={(e) => updateState('amazonTaxPercent', parseFloat(e.target.value) || 0)}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value) || 0;
+                      setState(prev => ({ ...prev, amazonTaxPercent: val, selectedState: '' }));
+                    }}
                     placeholder="8.25"
                     className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-transparent focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
                   />
@@ -301,7 +336,7 @@ export default function App() {
                     <div className="group relative">
                       <Info className="w-3.5 h-3.5 text-neutral-400 cursor-help" />
                       <div className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-neutral-900 text-white text-[10px] rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-20">
-                        Standard eBay fee is approximately 13.6%
+                        Standard eBay fee is approximately 13.25%
                       </div>
                     </div>
                   </div>
@@ -311,11 +346,34 @@ export default function App() {
                       type="number" 
                       value={state.ebayFeePercent || ''} 
                       onChange={(e) => updateState('ebayFeePercent', parseFloat(e.target.value) || 0)}
-                      placeholder="13.6"
+                      placeholder="13.25"
                       className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-transparent focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     />
                   </div>
                 </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">eBay Store</label>
+                  <select 
+                    value={state.hasEbayStore ? 'yes' : 'no'}
+                    onChange={(e) => {
+                      const hasStore = e.target.value === 'yes';
+                      const storeType: EbayStoreType = hasStore ? 'basic' : 'none';
+                      setState(prev => ({ 
+                        ...prev, 
+                        hasEbayStore: hasStore, 
+                        ebayStoreType: storeType,
+                        ebayFeePercent: EBAY_STORES[storeType].defaultFeePercent
+                      }));
+                    }}
+                    className="w-full px-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-transparent focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none"
+                  >
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Promoted Listing</label>
                   <select 
@@ -326,6 +384,37 @@ export default function App() {
                     <option value="no">No</option>
                     <option value="yes">Yes</option>
                   </select>
+                </div>
+                <div className="space-y-2">
+                  <AnimatePresence mode="wait">
+                    {state.hasEbayStore && (
+                      <motion.div 
+                        key="store-sub"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Store Subscription</label>
+                        <select 
+                          value={state.ebayStoreType}
+                          onChange={(e) => {
+                            const type = e.target.value as EbayStoreType;
+                            setState(prev => ({ 
+                              ...prev, 
+                              ebayStoreType: type,
+                              ebayFeePercent: EBAY_STORES[type].defaultFeePercent
+                            }));
+                          }}
+                          className="w-full px-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-transparent focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none"
+                        >
+                          {Object.entries(EBAY_STORES).filter(([key]) => key !== 'none').map(([key, config]) => (
+                            <option key={key} value={key}>{config.name}</option>
+                          ))}
+                        </select>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
 
@@ -360,7 +449,7 @@ export default function App() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Fixed Fee</p>
-                  <p className="text-sm font-mono font-semibold">$0.40 per sale</p>
+                  <p className="text-sm font-mono font-semibold">${currentFixedFee.toFixed(2)} per sale</p>
                 </div>
               </div>
             </div>
@@ -542,7 +631,7 @@ export default function App() {
                   )}
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-neutral-500">Fixed Fee</span>
-                    <span className="font-mono text-neutral-600 dark:text-neutral-400">-$0.40</span>
+                    <span className="font-mono text-neutral-600 dark:text-neutral-400">-${currentFixedFee.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm font-bold">
                     <span className="text-neutral-500">Total Fees</span>

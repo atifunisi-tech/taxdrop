@@ -1,3 +1,5 @@
+export type EbayStoreType = 'none' | 'starter' | 'basic' | 'premium' | 'anchor' | 'enterprise';
+
 export interface CalculatorState {
   amazonPrice: number;
   amazonTaxPercent: number;
@@ -11,13 +13,16 @@ export interface CalculatorState {
   isManualSalePrice: boolean;
   isForecastExpanded: boolean;
   isMarginForecastExpanded: boolean;
+  selectedState: string;
+  hasEbayStore: boolean;
+  ebayStoreType: EbayStoreType;
 }
 
 export const DEFAULT_STATE: CalculatorState = {
   amazonPrice: 0,
-  amazonTaxPercent: 8.25,
+  amazonTaxPercent: 0,
   ebaySalePrice: 0,
-  ebayFeePercent: 13.6,
+  ebayFeePercent: 13.25,
   isPromoted: false,
   promotedPercent: 2,
   autoImportAmazon: true,
@@ -26,4 +31,7 @@ export const DEFAULT_STATE: CalculatorState = {
   isManualSalePrice: false,
   isForecastExpanded: true,
   isMarginForecastExpanded: true,
+  selectedState: '',
+  hasEbayStore: false,
+  ebayStoreType: 'none',
 };
