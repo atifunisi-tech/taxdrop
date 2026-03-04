@@ -1,44 +1,42 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Courier+Prime:wght@400;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Cormorant Garamond", serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Courier Prime", "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   
-  --color-gold-50: #fbf8f1;
-  --color-gold-100: #f5eedb;
-  --color-gold-200: #ead9b3;
-  --color-gold-300: #dabf82;
-  --color-gold-400: #c5a059;
-  --color-gold-500: #b38b45;
-  --color-gold-600: #9a723a;
-  --color-gold-700: #815c33;
-  --color-gold-800: #6b4d2f;
-  --color-gold-900: #5a422b;
-  --color-gold-950: #342518;
+  --color-zap-orange: #ff4f00;
+  --color-zap-black: #000000;
+  --color-zap-white: #ffffff;
+  --color-zap-gray: #f5f5f5;
+  --color-zap-border: #e5e5e5;
 }
 
 @layer base {
-  body {
-    @apply antialiased selection:bg-gold-200 selection:text-gold-900;
-  }
-  
   input[type="number"]::-webkit-inner-spin-button,
   input[type="number"]::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
   }
+
+  body {
+    @apply bg-[#e5e5e5] dark:bg-neutral-950 font-mono;
+  }
 }
 
-.luxury-card {
-  @apply bg-white dark:bg-[#1A1A1A] border border-gold-100 dark:border-gold-900/30 shadow-[0_4px_20px_rgba(179,139,69,0.05)] rounded-none;
-}
-
-.luxury-input {
-  @apply w-full pl-9 pr-4 py-3 bg-transparent border-b border-gold-200 dark:border-gold-800 focus:border-gold-500 dark:focus:border-gold-400 outline-none transition-all font-sans text-sm tracking-tight;
-}
-
-.luxury-label {
-  @apply text-[10px] uppercase tracking-[0.2em] font-bold text-gold-700 dark:text-gold-400 mb-2 block;
+@layer utilities {
+  .receipt-jagged {
+    mask-image: radial-gradient(circle at 50% 100%, transparent 5px, black 5px);
+    mask-size: 10px 10px;
+    mask-position: 0 -5px;
+    mask-repeat: repeat-x;
+  }
+  
+  .receipt-paper {
+    background-color: #fdfdfd;
+    background-image: 
+      linear-gradient(90deg, transparent 79px, #abced4 79px, #abced4 81px, transparent 81px),
+      linear-gradient(#eee .1em, transparent .1em);
+    background-size: 100% 1.2em;
+  }
 }

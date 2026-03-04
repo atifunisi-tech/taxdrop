@@ -11,11 +11,15 @@ export interface CalculatorState {
   manualAmazonCost: number;
   darkMode: boolean;
   isManualSalePrice: boolean;
+  isAutoBreakeven: boolean;
   isForecastExpanded: boolean;
   isMarginForecastExpanded: boolean;
   selectedState: string;
   hasEbayStore: boolean;
   ebayStoreType: EbayStoreType;
+  receiptTheme: boolean;
+  tripleMarsTheme: boolean;
+  zapTheme: boolean;
 }
 
 export const DEFAULT_STATE: CalculatorState = {
@@ -29,9 +33,13 @@ export const DEFAULT_STATE: CalculatorState = {
   manualAmazonCost: 0,
   darkMode: false,
   isManualSalePrice: false,
+  isAutoBreakeven: true,
   isForecastExpanded: true,
   isMarginForecastExpanded: true,
   selectedState: '',
   hasEbayStore: false,
   ebayStoreType: 'none',
+  receiptTheme: false,
+  tripleMarsTheme: false,
+  zapTheme: true,
 };
