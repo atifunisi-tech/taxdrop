@@ -37,6 +37,127 @@ import { CalculatorState, DEFAULT_STATE, EbayStoreType } from './types';
 import { US_STATES } from './constants/states';
 import { EBAY_STORES } from './constants/ebay';
 
+const ReceiptCard = ({ children, title, icon: Icon, iconColor, expanded, onToggle, zapTheme, tripleMarsTheme, receiptTheme }: { children: React.ReactNode, title: string, icon: any, iconColor: string, expanded?: boolean, onToggle?: () => void, zapTheme: boolean, tripleMarsTheme: boolean, receiptTheme: boolean }) => {
+  if (zapTheme) {
+    return (
+      <motion.section 
+        initial={{ y: 10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="bg-white border border-neutral-200 rounded-2xl p-8 shadow-[0_2px_4px_rgba(0,0,0,0.04),0_8px_16px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_8px_rgba(0,0,0,0.06),0_12px_24px_rgba(0,0,0,0.06)] transition-all duration-300"
+      >
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-zap-orange/10 rounded-xl">
+              <Icon className="w-6 h-6 text-zap-orange" />
+            </div>
+            <h2 className="text-xl font-bold text-zap-black tracking-tight">{title}</h2>
+          </div>
+          {onToggle && (
+            <button 
+              onClick={onToggle}
+              className="p-2 rounded-lg hover:bg-neutral-100 text-neutral-400 hover:text-zap-black transition-all"
+            >
+              {expanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+            </button>
+          )}
+        </div>
+        <div className="text-neutral-700">
+          {children}
+        </div>
+      </motion.section>
+    );
+  }
+
+  if (tripleMarsTheme) {
+    return (
+      <motion.section 
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="bg-white border border-[#00d2ff]/30 rounded-2xl p-6 shadow-[0_10px_40px_rgba(0,210,255,0.08)] hover:shadow-[0_15px_50px_rgba(0,210,255,0.12)] transition-all duration-500 group relative overflow-hidden"
+      >
+        {/* Subtle background glow */}
+        <div className="absolute -top-24 -right-24 w-48 h-48 bg-[#00d2ff]/5 rounded-full blur-3xl group-hover:bg-[#00d2ff]/10 transition-colors duration-500" />
+        
+        <div className="flex items-center justify-between mb-6 relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-gradient-to-br from-[#00d2ff] to-[#0080ff] rounded-xl shadow-[0_4px_12px_rgba(0,210,255,0.3)] group-hover:scale-110 transition-transform duration-300">
+              <Icon className={`w-5 h-5 text-white`} />
+            </div>
+            <h2 className="text-lg font-bold text-slate-900 tracking-tight">{title}</h2>
+          </div>
+          <div className="absolute top-0 right-0 opacity-[0.03] pointer-events-none select-none">
+            <span className="text-6xl font-black tracking-tighter">DCal</span>
+          </div>
+          {onToggle && (
+            <button 
+              onClick={onToggle}
+              className="p-1.5 rounded-lg bg-slate-100 hover:bg-[#00d2ff]/10 text-slate-400 hover:text-[#00d2ff] transition-all"
+            >
+              {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+          )}
+        </div>
+        <div className="text-slate-600 relative z-10">
+          {children}
+        </div>
+      </motion.section>
+    );
+  }
+
+  if (!receiptTheme) {
+    return (
+      <section className="bg-white dark:bg-neutral-900 rounded-2xl p-6 shadow-sm border border-neutral-200 dark:border-neutral-800">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <Icon className={`w-5 h-5 ${iconColor}`} />
+            <h2 className="text-lg font-semibold">{title}</h2>
+          </div>
+          {onToggle && (
+            <button 
+              onClick={onToggle}
+              className="p-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+            >
+              {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+          )}
+        </div>
+        {children}
+      </section>
+    );
+  }
+
+  return (
+    <section className="bg-[#fdfdfd] dark:bg-neutral-900 rounded-sm shadow-xl border-t-4 border-neutral-400 dark:border-neutral-600 overflow-hidden font-mono text-neutral-800 dark:text-neutral-200">
+      <div className="p-6 pb-2 text-center border-b border-dashed border-neutral-300 dark:border-neutral-700">
+        <div className="flex justify-center mb-2">
+          <Icon className={`w-4 h-4 ${iconColor} opacity-50`} />
+        </div>
+        <h2 className="font-black text-sm tracking-tighter uppercase">{title}</h2>
+        <div className="flex justify-between text-[8px] opacity-40 mt-2">
+          <span>DEPT: {title.split(' ')[0].toUpperCase()}</span>
+          {onToggle && (
+            <button onClick={onToggle} className="hover:opacity-100">
+              [{expanded ? 'COLLAPSE' : 'EXPAND'}]
+            </button>
+          )}
+        </div>
+      </div>
+      <div className="p-6">
+        {children}
+      </div>
+      <div className="px-6 pb-4 text-center">
+        <div className="w-full h-4 bg-neutral-900 dark:bg-neutral-100 opacity-5 flex gap-[1px] overflow-hidden mb-2">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <div key={i} className="h-full bg-black dark:bg-white" style={{ width: `${Math.random() * 3 + 1}px` }} />
+          ))}
+        </div>
+        <span className="text-[8px] tracking-[0.5em] opacity-40">01234567890123</span>
+      </div>
+    </section>
+  );
+};
+
 export default function App() {
   const [state, setState] = useState<CalculatorState>(() => {
     const saved = localStorage.getItem('dropcalc_state');
@@ -77,6 +198,9 @@ export default function App() {
     return Math.round((rawCost + Number.EPSILON) * 100) / 100;
   }, [state.autoImportAmazon, amazonTotalCost, state.manualAmazonCost]);
 
+  const ebayDiscountAmount = useMemo(() => (state.ebaySalePrice * state.ebayDiscountPercent) / 100, [state.ebaySalePrice, state.ebayDiscountPercent]);
+  const effectiveSalePrice = useMemo(() => state.ebaySalePrice - ebayDiscountAmount, [state.ebaySalePrice, ebayDiscountAmount]);
+
   // Breakeven Calculation
   const calculateBreakeven = () => {
     const cost = effectiveAmazonCost;
@@ -109,20 +233,20 @@ export default function App() {
     state.isAutoBreakeven
   ]);
 
-  const ebayFeeAmount = useMemo(() => (state.ebaySalePrice * state.ebayFeePercent) / 100, [state.ebaySalePrice, state.ebayFeePercent]);
-  const promotedFeeAmount = useMemo(() => state.isPromoted ? (state.ebaySalePrice * state.promotedPercent) / 100 : 0, [state.ebaySalePrice, state.isPromoted, state.promotedPercent]);
-  const actualFixedFee = state.ebaySalePrice > 0 ? currentFixedFee : 0;
+  const ebayFeeAmount = useMemo(() => (effectiveSalePrice * state.ebayFeePercent) / 100, [effectiveSalePrice, state.ebayFeePercent]);
+  const promotedFeeAmount = useMemo(() => state.isPromoted ? (effectiveSalePrice * state.promotedPercent) / 100 : 0, [effectiveSalePrice, state.isPromoted, state.promotedPercent]);
+  const actualFixedFee = effectiveSalePrice > 0 ? currentFixedFee : 0;
   const totalFees = useMemo(() => ebayFeeAmount + promotedFeeAmount + actualFixedFee, [ebayFeeAmount, promotedFeeAmount, actualFixedFee]);
-  const netProfit = useMemo(() => state.ebaySalePrice > 0 ? state.ebaySalePrice - effectiveAmazonCost - totalFees : 0, [state.ebaySalePrice, effectiveAmazonCost, totalFees]);
-  const profitMargin = useMemo(() => state.ebaySalePrice > 0 ? (netProfit / state.ebaySalePrice) * 100 : 0, [netProfit, state.ebaySalePrice]);
+  const netProfit = useMemo(() => effectiveSalePrice > 0 ? effectiveSalePrice - effectiveAmazonCost - totalFees : 0, [effectiveSalePrice, effectiveAmazonCost, totalFees]);
+  const profitMargin = useMemo(() => effectiveSalePrice > 0 ? (netProfit / effectiveSalePrice) * 100 : 0, [netProfit, effectiveSalePrice]);
 
   const promotionForecast = useMemo(() => {
     const percentages = Array.from({ length: 13 }, (_, i) => i + 1);
     return percentages.map(percent => {
-      const pFee = (state.ebaySalePrice * percent) / 100;
+      const pFee = (effectiveSalePrice * percent) / 100;
       const tFees = ebayFeeAmount + pFee + actualFixedFee;
-      const nProfit = state.ebaySalePrice > 0 ? state.ebaySalePrice - effectiveAmazonCost - tFees : 0;
-      const pMargin = state.ebaySalePrice > 0 ? (nProfit / state.ebaySalePrice) * 100 : 0;
+      const nProfit = effectiveSalePrice > 0 ? effectiveSalePrice - effectiveAmazonCost - tFees : 0;
+      const pMargin = effectiveSalePrice > 0 ? (nProfit / effectiveSalePrice) * 100 : 0;
       return {
         percent,
         totalFees: tFees,
@@ -130,7 +254,7 @@ export default function App() {
         profitMargin: pMargin
       };
     });
-  }, [state.ebaySalePrice, state.ebayFeePercent, effectiveAmazonCost, ebayFeeAmount, actualFixedFee]);
+  }, [effectiveSalePrice, state.ebayFeePercent, effectiveAmazonCost, ebayFeeAmount, actualFixedFee]);
 
   const marginForecast = useMemo(() => {
     const margins = [5, 10, 15, 20, 30, 40, 50];
@@ -162,8 +286,9 @@ export default function App() {
       { name: 'eBay FVF', value: ebayFeeAmount, color: '#f59e0b', category: 'Fees' }, // amber-500
       { name: 'Promoted Fee', value: promotedFeeAmount, color: '#f97316', category: 'Fees' }, // orange-500
       { name: 'Fixed Fee', value: actualFixedFee, color: '#fbbf24', category: 'Fees' }, // amber-400
+      { name: 'Discount', value: ebayDiscountAmount, color: '#ef4444', category: 'Discount' }, // red-500
     ].filter(item => item.value > 0);
-  }, [effectiveAmazonCost, ebayFeeAmount, promotedFeeAmount, actualFixedFee, netProfit]);
+  }, [effectiveAmazonCost, ebayFeeAmount, promotedFeeAmount, actualFixedFee, netProfit, ebayDiscountAmount]);
 
   const handleReset = () => {
     setState({ ...DEFAULT_STATE, darkMode: state.darkMode });
@@ -171,12 +296,14 @@ export default function App() {
 
   const handleCopy = () => {
     const receiptText = `
-=== ${state.tripleMarsTheme ? 'TRIPLEMARS DROPSHIP' : 'EBAY DROPSHIP CO.'} ===
+=== ${state.zapTheme ? 'ZAP PROFIT SUMMARY' : state.tripleMarsTheme ? 'TRIPLEMARS DROPSHIP' : 'EBAY DROPSHIP CO.'} ===
 DATE: ${new Date().toLocaleDateString()}
 TIME: ${new Date().toLocaleTimeString()}
 --------------------------
 AMAZON COST:    $${effectiveAmazonCost.toFixed(2)}
 EBAY SALE PRICE: $${state.ebaySalePrice.toFixed(2)}
+${state.ebayDiscountPercent > 0 ? `DISCOUNT:       -$${ebayDiscountAmount.toFixed(2)} (${state.ebayDiscountPercent}%)` : ''}
+${state.ebayDiscountPercent > 0 ? `FINAL PRICE:    $${effectiveSalePrice.toFixed(2)}` : ''}
 --------------------------
 EBAY FVF:       -$${ebayFeeAmount.toFixed(2)} (${state.ebayFeePercent}%)
 ${state.isPromoted ? `PROMOTED FEE:  -$${promotedFeeAmount.toFixed(2)} (${state.promotedPercent}%)` : ''}
@@ -199,130 +326,10 @@ ROI:             ${effectiveAmazonCost > 0 ? ((netProfit / effectiveAmazonCost) 
     setState(prev => ({ ...prev, [key]: value }));
   };
 
-  const ReceiptCard = ({ children, title, icon: Icon, iconColor, expanded, onToggle }: { children: React.ReactNode, title: string, icon: any, iconColor: string, expanded?: boolean, onToggle?: () => void }) => {
-    if (state.zapTheme) {
-      return (
-        <motion.section 
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="bg-white border border-neutral-200 rounded-2xl p-8 shadow-[0_2px_4px_rgba(0,0,0,0.04),0_8px_16px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_8px_rgba(0,0,0,0.06),0_12px_24px_rgba(0,0,0,0.06)] transition-all duration-300"
-        >
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-zap-orange/10 rounded-xl">
-                <Icon className="w-6 h-6 text-zap-orange" />
-              </div>
-              <h2 className="text-xl font-bold text-zap-black tracking-tight">{title}</h2>
-            </div>
-            {onToggle && (
-              <button 
-                onClick={onToggle}
-                className="p-2 rounded-lg hover:bg-neutral-100 text-neutral-400 hover:text-zap-black transition-all"
-              >
-                {expanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-              </button>
-            )}
-          </div>
-          <div className="text-neutral-700">
-            {children}
-          </div>
-        </motion.section>
-      );
-    }
-
-    if (state.tripleMarsTheme) {
-      return (
-        <motion.section 
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="bg-white border border-[#00d2ff]/30 rounded-2xl p-6 shadow-[0_10px_40px_rgba(0,210,255,0.08)] hover:shadow-[0_15px_50px_rgba(0,210,255,0.12)] transition-all duration-500 group relative overflow-hidden"
-        >
-          {/* Subtle background glow */}
-          <div className="absolute -top-24 -right-24 w-48 h-48 bg-[#00d2ff]/5 rounded-full blur-3xl group-hover:bg-[#00d2ff]/10 transition-colors duration-500" />
-          
-          <div className="flex items-center justify-between mb-6 relative z-10">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-gradient-to-br from-[#00d2ff] to-[#0080ff] rounded-xl shadow-[0_4px_12px_rgba(0,210,255,0.3)] group-hover:scale-110 transition-transform duration-300">
-                <Icon className={`w-5 h-5 text-white`} />
-              </div>
-              <h2 className="text-lg font-bold text-slate-900 tracking-tight">{title}</h2>
-            </div>
-            <div className="absolute top-0 right-0 opacity-[0.03] pointer-events-none select-none">
-              <span className="text-6xl font-black tracking-tighter">DCal</span>
-            </div>
-            {onToggle && (
-              <button 
-                onClick={onToggle}
-                className="p-1.5 rounded-lg bg-slate-100 hover:bg-[#00d2ff]/10 text-slate-400 hover:text-[#00d2ff] transition-all"
-              >
-                {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </button>
-            )}
-          </div>
-          <div className="text-slate-600 relative z-10">
-            {children}
-          </div>
-        </motion.section>
-      );
-    }
-
-    if (!state.receiptTheme) {
-      return (
-        <section className="bg-white dark:bg-neutral-900 rounded-2xl p-6 shadow-sm border border-neutral-200 dark:border-neutral-800">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <Icon className={`w-5 h-5 ${iconColor}`} />
-              <h2 className="text-lg font-semibold">{title}</h2>
-            </div>
-            {onToggle && (
-              <button 
-                onClick={onToggle}
-                className="p-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
-              >
-                {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </button>
-            )}
-          </div>
-          {children}
-        </section>
-      );
-    }
-
-    return (
-      <section className="bg-[#fdfdfd] dark:bg-neutral-900 rounded-sm shadow-xl border-t-4 border-neutral-400 dark:border-neutral-600 overflow-hidden font-mono text-neutral-800 dark:text-neutral-200">
-        <div className="p-6 pb-2 text-center border-b border-dashed border-neutral-300 dark:border-neutral-700">
-          <div className="flex justify-center mb-2">
-            <Icon className={`w-4 h-4 ${iconColor} opacity-50`} />
-          </div>
-          <h2 className="font-black text-sm tracking-tighter uppercase">{title}</h2>
-          <div className="flex justify-between text-[8px] opacity-40 mt-2">
-            <span>DEPT: {title.split(' ')[0].toUpperCase()}</span>
-            {onToggle && (
-              <button onClick={onToggle} className="hover:opacity-100">
-                [{expanded ? 'COLLAPSE' : 'EXPAND'}]
-              </button>
-            )}
-          </div>
-        </div>
-        <div className="p-6">
-          {children}
-        </div>
-        <div className="px-6 pb-4 text-center">
-          <div className="w-full h-4 bg-neutral-900 dark:bg-neutral-100 opacity-5 flex gap-[1px] overflow-hidden mb-2">
-            {Array.from({ length: 20 }).map((_, i) => (
-              <div key={i} className="h-full bg-black dark:bg-white" style={{ width: `${Math.random() * 3 + 1}px` }} />
-            ))}
-          </div>
-          <p className="text-[8px] opacity-30 uppercase tracking-widest">*** END OF SECTION ***</p>
-        </div>
-        <div className="h-2 w-full bg-repeat-x" style={{ 
-          backgroundImage: `radial-gradient(circle at 50% 100%, transparent 3px, #fdfdfd 3px)`,
-          backgroundSize: '6px 6px',
-          backgroundPosition: '0 -3px'
-        }} />
-      </section>
-    );
+  const commonCardProps = {
+    zapTheme: state.zapTheme,
+    tripleMarsTheme: state.tripleMarsTheme,
+    receiptTheme: state.receiptTheme
   };
 
   return (
@@ -385,89 +392,112 @@ ROI:             ${effectiveAmazonCost > 0 ? ((netProfit / effectiveAmazonCost) 
         <div className="lg:col-span-7 space-y-8">
           
           {/* Section 1: Amazon */}
-          <ReceiptCard title="Amazon Sales Tax" icon={Package} iconColor="text-emerald-500">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Product Price (USD)</label>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                  <input 
-                    type="number" 
-                    value={state.amazonPrice || ''} 
-                    onChange={(e) => {
-                      const val = parseFloat(e.target.value) || 0;
-                      setState(prev => ({ ...prev, amazonPrice: val, isManualSalePrice: false }));
-                    }}
-                    placeholder="0.00"
-                    className={`w-full pl-9 pr-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-transparent outline-none transition-all ${state.zapTheme ? 'focus:ring-2 focus:ring-zap-orange border-neutral-200 bg-white' : state.tripleMarsTheme ? 'focus:ring-2 focus:ring-[#00d2ff] border-slate-200 bg-white/50' : 'focus:ring-2 focus:ring-emerald-500'}`}
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">State Filter</label>
-                <select 
-                  value={state.selectedState}
-                  onChange={(e) => {
-                    const stateName = e.target.value;
-                    const selected = US_STATES.find(s => s.name === stateName);
-                    if (selected) {
-                      setState(prev => ({ 
-                        ...prev, 
-                        selectedState: stateName, 
-                        amazonTaxPercent: selected.rate 
-                      }));
-                    } else {
-                      updateState('selectedState', '');
-                    }
-                  }}
-                  className={`w-full px-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-transparent outline-none transition-all appearance-none ${state.zapTheme ? 'focus:ring-2 focus:ring-zap-orange border-neutral-200 bg-white' : state.tripleMarsTheme ? 'focus:ring-2 focus:ring-[#00d2ff] border-slate-200 bg-white/50' : 'focus:ring-2 focus:ring-emerald-500'}`}
+          <ReceiptCard 
+            title="Amazon Sales Tax" 
+            icon={Package} 
+            iconColor="text-emerald-500"
+            expanded={state.isAmazonExpanded}
+            onToggle={() => updateState('isAmazonExpanded', !state.isAmazonExpanded)}
+            {...commonCardProps}
+          >
+            <AnimatePresence>
+              {state.isAmazonExpanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
                 >
-                  <option value="">Select State</option>
-                  {US_STATES.map(s => (
-                    <option key={s.name} value={s.name}>{s.name} ({s.rate}%)</option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Sales Tax (%)</label>
-                <div className="relative">
-                  <Percent className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                  <input 
-                    type="number" 
-                    value={state.amazonTaxPercent || ''} 
-                    onChange={(e) => {
-                      const val = parseFloat(e.target.value) || 0;
-                      setState(prev => ({ ...prev, amazonTaxPercent: val, selectedState: '' }));
-                    }}
-                    placeholder="8.25"
-                    className={`w-full pl-9 pr-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-transparent outline-none transition-all ${state.zapTheme ? 'focus:ring-2 focus:ring-zap-orange border-neutral-200 bg-white' : state.tripleMarsTheme ? 'focus:ring-2 focus:ring-[#00d2ff] border-slate-200 bg-white/50' : 'focus:ring-2 focus:ring-emerald-500'}`}
-                  />
-                </div>
-              </div>
-            </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Product Price (USD)</label>
+                      <div className="relative">
+                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                        <input 
+                          type="number" 
+                          value={state.amazonPrice || ''} 
+                          onChange={(e) => {
+                            const val = parseFloat(e.target.value) || 0;
+                            setState(prev => ({ ...prev, amazonPrice: val, isManualSalePrice: false }));
+                          }}
+                          placeholder="0.00"
+                          className={`w-full pl-9 pr-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-transparent outline-none transition-all ${state.zapTheme ? 'focus:ring-2 focus:ring-zap-orange border-neutral-200 bg-white' : state.tripleMarsTheme ? 'focus:ring-2 focus:ring-[#00d2ff] border-slate-200 bg-white/50' : 'focus:ring-2 focus:ring-emerald-500'}`}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">State Filter</label>
+                      <select 
+                        value={state.selectedState}
+                        onChange={(e) => {
+                          const stateName = e.target.value;
+                          const selected = US_STATES.find(s => s.name === stateName);
+                          if (selected) {
+                            setState(prev => ({ 
+                              ...prev, 
+                              selectedState: stateName, 
+                              amazonTaxPercent: selected.rate 
+                            }));
+                          } else {
+                            updateState('selectedState', '');
+                          }
+                        }}
+                        className={`w-full px-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-transparent outline-none transition-all appearance-none ${state.zapTheme ? 'focus:ring-2 focus:ring-zap-orange border-neutral-200 bg-white' : state.tripleMarsTheme ? 'focus:ring-2 focus:ring-[#00d2ff] border-slate-200 bg-white/50' : 'focus:ring-2 focus:ring-emerald-500'}`}
+                      >
+                        <option value="">Select State</option>
+                        {US_STATES.map(s => (
+                          <option key={s.name} value={s.name}>{s.name} ({s.rate}%)</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Sales Tax (%)</label>
+                      <div className="relative">
+                        <Percent className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                        <input 
+                          type="number" 
+                          value={state.amazonTaxPercent || ''} 
+                          onChange={(e) => {
+                            const val = parseFloat(e.target.value) || 0;
+                            setState(prev => ({ ...prev, amazonTaxPercent: val, selectedState: '' }));
+                          }}
+                          placeholder="8.25"
+                          className={`w-full pl-9 pr-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-transparent outline-none transition-all ${state.zapTheme ? 'focus:ring-2 focus:ring-zap-orange border-neutral-200 bg-white' : state.tripleMarsTheme ? 'focus:ring-2 focus:ring-[#00d2ff] border-slate-200 bg-white/50' : 'focus:ring-2 focus:ring-emerald-500'}`}
+                        />
+                      </div>
+                    </div>
+                  </div>
 
-            <div className={`mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 p-6 rounded-2xl ${state.receiptTheme ? 'border border-dashed border-neutral-300 dark:border-neutral-700' : state.zapTheme ? 'bg-neutral-50 border border-neutral-100' : state.tripleMarsTheme ? 'bg-[#00d2ff]/5 border border-[#00d2ff]/20' : 'bg-neutral-50 dark:bg-neutral-800/50'}`}>
-              <div>
-                <p className={`text-[10px] uppercase tracking-wider font-bold mb-1 ${state.zapTheme ? 'text-neutral-400' : state.tripleMarsTheme ? 'text-[#00d2ff]/60' : 'text-neutral-400'}`}>Price</p>
-                <p className={`font-mono text-sm ${state.zapTheme ? 'text-zap-black font-bold' : state.tripleMarsTheme ? 'text-slate-900' : ''}`}>${state.amazonPrice.toFixed(2)}</p>
-              </div>
-              <div>
-                <p className={`text-[10px] uppercase tracking-wider font-bold mb-1 ${state.zapTheme ? 'text-neutral-400' : state.tripleMarsTheme ? 'text-[#00d2ff]/60' : 'text-neutral-400'}`}>Tax %</p>
-                <p className={`font-mono text-sm ${state.zapTheme ? 'text-zap-black font-bold' : state.tripleMarsTheme ? 'text-slate-900' : ''}`}>{state.amazonTaxPercent}%</p>
-              </div>
-              <div>
-                <p className={`text-[10px] uppercase tracking-wider font-bold mb-1 ${state.zapTheme ? 'text-neutral-400' : state.tripleMarsTheme ? 'text-[#00d2ff]/60' : 'text-neutral-400'}`}>Tax Amt</p>
-                <p className={`font-mono text-sm ${state.zapTheme ? 'text-zap-orange font-bold' : state.tripleMarsTheme ? 'text-[#00d2ff] font-bold' : 'text-amber-600 dark:text-amber-400'}`}>${amazonTaxAmount.toFixed(2)}</p>
-              </div>
-              <div>
-                <p className={`text-[10px] uppercase tracking-wider font-bold mb-1 ${state.zapTheme ? 'text-neutral-400' : state.tripleMarsTheme ? 'text-[#00d2ff]/60' : 'text-neutral-400'}`}>Total Cost</p>
-                <p className={`font-mono text-sm font-bold ${state.zapTheme ? 'text-zap-orange' : state.tripleMarsTheme ? 'text-[#00d2ff]' : 'text-emerald-600 dark:text-emerald-400'}`}>${amazonTotalCost.toFixed(2)}</p>
-              </div>
-            </div>
+                  <div className={`mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 p-6 rounded-2xl ${state.receiptTheme ? 'border border-dashed border-neutral-300 dark:border-neutral-700' : state.zapTheme ? 'bg-neutral-50 border border-neutral-100' : state.tripleMarsTheme ? 'bg-[#00d2ff]/5 border border-[#00d2ff]/20' : 'bg-neutral-50 dark:bg-neutral-800/50'}`}>
+                    <div>
+                      <p className={`text-[10px] uppercase tracking-wider font-bold mb-1 ${state.zapTheme ? 'text-neutral-400' : state.tripleMarsTheme ? 'text-[#00d2ff]/60' : 'text-neutral-400'}`}>Price</p>
+                      <p className={`font-mono text-sm ${state.zapTheme ? 'text-zap-black font-bold' : state.tripleMarsTheme ? 'text-slate-900' : ''}`}>${state.amazonPrice.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <p className={`text-[10px] uppercase tracking-wider font-bold mb-1 ${state.zapTheme ? 'text-neutral-400' : state.tripleMarsTheme ? 'text-[#00d2ff]/60' : 'text-neutral-400'}`}>Tax %</p>
+                      <p className={`font-mono text-sm ${state.zapTheme ? 'text-zap-black font-bold' : state.tripleMarsTheme ? 'text-slate-900' : ''}`}>{state.amazonTaxPercent}%</p>
+                    </div>
+                    <div>
+                      <p className={`text-[10px] uppercase tracking-wider font-bold mb-1 ${state.zapTheme ? 'text-neutral-400' : state.tripleMarsTheme ? 'text-[#00d2ff]/60' : 'text-neutral-400'}`}>Tax Amt</p>
+                      <p className={`font-mono text-sm ${state.zapTheme ? 'text-zap-orange font-bold' : state.tripleMarsTheme ? 'text-[#00d2ff] font-bold' : 'text-amber-600 dark:text-amber-400'}`}>${amazonTaxAmount.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <p className={`text-[10px] uppercase tracking-wider font-bold mb-1 ${state.zapTheme ? 'text-neutral-400' : state.tripleMarsTheme ? 'text-[#00d2ff]/60' : 'text-neutral-400'}`}>Total Cost</p>
+                      <p className={`font-mono text-sm font-bold ${state.zapTheme ? 'text-zap-orange' : state.tripleMarsTheme ? 'text-[#00d2ff]' : 'text-emerald-600 dark:text-emerald-400'}`}>${amazonTotalCost.toFixed(2)}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </ReceiptCard>
 
           {/* Section 2: eBay */}
-          <ReceiptCard title="eBay Profit" icon={TrendingUp} iconColor="text-blue-500">
+          <ReceiptCard 
+            title="eBay Profit" 
+            icon={TrendingUp} 
+            iconColor="text-blue-500"
+            {...commonCardProps}
+          >
             <div className="flex items-center justify-end gap-3 mb-4">
               <div className="flex items-center gap-2 bg-neutral-100 dark:bg-neutral-800 p-1 rounded-lg">
                 <span className="text-xs font-medium px-2 text-neutral-500">Auto Breakeven</span>
@@ -588,10 +618,24 @@ ROI:             ${effectiveAmazonCost > 0 ? ((netProfit / effectiveAmazonCost) 
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <AnimatePresence mode="wait">
-                    {state.hasEbayStore && (
-                      <motion.div 
-                        key="store-sub"
+                  <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Discount (%)</label>
+                  <div className="relative">
+                    <Percent className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                    <input 
+                      type="number" 
+                      value={state.ebayDiscountPercent || ''} 
+                      onChange={(e) => updateState('ebayDiscountPercent', parseFloat(e.target.value) || 0)}
+                      placeholder="0"
+                      className={`w-full pl-9 pr-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-transparent outline-none transition-all ${state.zapTheme ? 'focus:ring-2 focus:ring-zap-orange border-neutral-200 bg-white' : state.tripleMarsTheme ? 'focus:ring-2 focus:ring-[#00d2ff] border-slate-200 bg-white/50' : 'focus:ring-2 focus:ring-blue-500'}`}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <AnimatePresence mode="wait">
+                {state.hasEbayStore && (
+                  <motion.div 
+                    key="store-sub"
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
@@ -617,44 +661,42 @@ ROI:             ${effectiveAmazonCost > 0 ? ((netProfit / effectiveAmazonCost) 
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </div>
-              </div>
 
-              <AnimatePresence>
-                {state.isPromoted && (
-                  <motion.div 
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="space-y-2 pt-2">
-                      <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Promoted Percentage (%)</label>
-                      <div className="relative">
-                        <Percent className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                        <input 
-                          type="number" 
-                          value={state.promotedPercent || ''} 
-                          onChange={(e) => updateState('promotedPercent', parseFloat(e.target.value) || 0)}
-                          placeholder="2"
-                          className={`w-full pl-9 pr-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-transparent outline-none transition-all ${state.zapTheme ? 'focus:ring-2 focus:ring-zap-orange border-neutral-200 bg-white' : state.tripleMarsTheme ? 'focus:ring-2 focus:ring-[#00d2ff] border-slate-200 bg-white/50' : 'focus:ring-2 focus:ring-blue-500'}`}
-                        />
-                      </div>
+                  <AnimatePresence>
+                    {state.isPromoted && (
+                      <motion.div 
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="space-y-2 pt-2">
+                          <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Promoted Percentage (%)</label>
+                          <div className="relative">
+                            <Percent className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                            <input 
+                              type="number" 
+                              value={state.promotedPercent || ''} 
+                              onChange={(e) => updateState('promotedPercent', parseFloat(e.target.value) || 0)}
+                              placeholder="2"
+                              className={`w-full pl-9 pr-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-transparent outline-none transition-all ${state.zapTheme ? 'focus:ring-2 focus:ring-zap-orange border-neutral-200 bg-white' : state.tripleMarsTheme ? 'focus:ring-2 focus:ring-[#00d2ff] border-slate-200 bg-white/50' : 'focus:ring-2 focus:ring-blue-500'}`}
+                            />
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  <div className={`flex items-center gap-3 p-4 rounded-xl border ${state.receiptTheme ? 'border-dashed border-neutral-300 dark:border-neutral-700' : state.zapTheme ? 'bg-neutral-50 border-neutral-100' : state.tripleMarsTheme ? 'bg-[#00d2ff]/5 border-[#00d2ff]/30' : 'bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800'}`}>
+                    <div className={`p-1.5 rounded-lg ${state.zapTheme ? 'bg-zap-orange' : state.tripleMarsTheme ? 'bg-gradient-to-br from-[#00d2ff] to-[#0080ff]' : 'bg-blue-500'}`}>
+                      <DollarSign className="w-4 h-4 text-white" />
                     </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <div className={`flex items-center gap-3 p-4 rounded-xl border ${state.receiptTheme ? 'border-dashed border-neutral-300 dark:border-neutral-700' : state.zapTheme ? 'bg-neutral-50 border-neutral-100' : state.tripleMarsTheme ? 'bg-[#00d2ff]/5 border-[#00d2ff]/30' : 'bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800'}`}>
-                <div className={`p-1.5 rounded-lg ${state.zapTheme ? 'bg-zap-orange' : state.tripleMarsTheme ? 'bg-gradient-to-br from-[#00d2ff] to-[#0080ff]' : 'bg-blue-500'}`}>
-                  <DollarSign className="w-4 h-4 text-white" />
+                    <div>
+                      <p className={`text-xs font-bold uppercase tracking-wider ${state.zapTheme ? 'text-zap-orange' : state.tripleMarsTheme ? 'text-[#00d2ff]' : 'text-blue-600 dark:text-blue-400'}`}>Fixed Fee</p>
+                      <p className={`text-sm font-mono font-semibold ${state.zapTheme ? 'text-zap-black' : state.tripleMarsTheme ? 'text-slate-900' : ''}`}>${currentFixedFee.toFixed(2)} per sale</p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p className={`text-xs font-bold uppercase tracking-wider ${state.zapTheme ? 'text-zap-orange' : state.tripleMarsTheme ? 'text-[#00d2ff]' : 'text-blue-600 dark:text-blue-400'}`}>Fixed Fee</p>
-                  <p className={`text-sm font-mono font-semibold ${state.zapTheme ? 'text-zap-black' : state.tripleMarsTheme ? 'text-slate-900' : ''}`}>${currentFixedFee.toFixed(2)} per sale</p>
-                </div>
-              </div>
-            </div>
           </ReceiptCard>
 
           {/* Promotion Forecast Section */}
@@ -664,6 +706,7 @@ ROI:             ${effectiveAmazonCost > 0 ? ((netProfit / effectiveAmazonCost) 
             iconColor="text-indigo-500"
             expanded={state.isForecastExpanded}
             onToggle={() => updateState('isForecastExpanded', !state.isForecastExpanded)}
+            {...commonCardProps}
           >
             <AnimatePresence>
               {state.isForecastExpanded && (
@@ -720,6 +763,7 @@ ROI:             ${effectiveAmazonCost > 0 ? ((netProfit / effectiveAmazonCost) 
             iconColor="text-emerald-500"
             expanded={state.isMarginForecastExpanded}
             onToggle={() => updateState('isMarginForecastExpanded', !state.isMarginForecastExpanded)}
+            {...commonCardProps}
           >
             <AnimatePresence>
               {state.isMarginForecastExpanded && (
@@ -769,87 +813,105 @@ ROI:             ${effectiveAmazonCost > 0 ? ((netProfit / effectiveAmazonCost) 
           </ReceiptCard>
 
           {/* Graphical Breakdown */}
-          <ReceiptCard title="Visual Breakdown" icon={PieIcon} iconColor="text-purple-500">
-            <div className="h-[240px] w-full relative">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={85}
-                    paddingAngle={2}
-                    dataKey="value"
-                    animationBegin={0}
-                    animationDuration={1200}
-                    animationEasing="ease-out"
-                    stroke="none"
-                  >
-                    {chartData.map((entry, index) => (
-                      <Cell 
-                        key={`cell-${index}`} 
-                        fill={entry.color} 
-                        className="hover:opacity-80 transition-opacity cursor-pointer"
-                      />
+          <ReceiptCard 
+            title="Visual Breakdown" 
+            icon={PieIcon} 
+            iconColor="text-purple-500"
+            expanded={state.isVisualExpanded}
+            onToggle={() => updateState('isVisualExpanded', !state.isVisualExpanded)}
+            {...commonCardProps}
+          >
+            <AnimatePresence>
+              {state.isVisualExpanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="h-[240px] w-full relative">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={chartData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={85}
+                          paddingAngle={2}
+                          dataKey="value"
+                          animationBegin={0}
+                          animationDuration={1200}
+                          animationEasing="ease-out"
+                          stroke="none"
+                        >
+                          {chartData.map((entry, index) => (
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={entry.color} 
+                              className="hover:opacity-80 transition-opacity cursor-pointer"
+                            />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              const data = payload[0].payload;
+                              const percentage = ((data.value / (state.ebaySalePrice || 1)) * 100).toFixed(1);
+                              return (
+                                <div className={`p-4 rounded-2xl shadow-2xl border font-mono text-[10px] ${state.zapTheme ? 'bg-white border-neutral-100 text-zap-black' : 'bg-white dark:bg-neutral-900 border-neutral-100 dark:border-neutral-800'}`}>
+                                  <p className="font-black uppercase tracking-tighter mb-2" style={{ color: state.zapTheme && data.name.includes('Profit') ? '#ff4f00' : data.color }}>{data.name}</p>
+                                  <div className="flex justify-between gap-6 opacity-60 mb-1">
+                                    <span>AMOUNT:</span>
+                                    <span className="font-bold">${data.value.toFixed(2)}</span>
+                                  </div>
+                                  <div className="flex justify-between gap-6 opacity-60">
+                                    <span>PERCENT:</span>
+                                    <span className="font-bold">{percentage}%</span>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    
+                    {/* Center Label: Profit focus */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                      <span className={`text-[9px] font-bold uppercase tracking-widest ${state.zapTheme ? 'text-zap-orange' : state.tripleMarsTheme ? 'text-[#00d2ff]' : 'opacity-30'}`}>Profit</span>
+                      <span className={`text-sm font-black tracking-tighter ${state.zapTheme ? 'text-zap-black' : state.tripleMarsTheme ? 'text-[#00d2ff]' : netProfit >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                        ${netProfit.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 grid grid-cols-1 gap-1">
+                    {chartData.map((item, idx) => (
+                      <div key={idx} className={`flex items-center justify-between text-[10px] font-mono py-1 border-b border-dashed last:border-0 transition-opacity ${state.zapTheme ? 'border-neutral-100 text-neutral-500 hover:text-zap-black' : state.tripleMarsTheme ? 'border-[#00d2ff]/20 text-slate-600 hover:text-slate-900' : 'border-neutral-200 dark:border-neutral-800 opacity-70 hover:opacity-100'}`}>
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: state.zapTheme && item.name.includes('Profit') ? '#ff4f00' : item.color }} />
+                          <span className="uppercase">{item.name}</span>
+                        </div>
+                        <div className="flex gap-3">
+                          <span>${item.value.toFixed(2)}</span>
+                          <span className={`w-10 text-right ${state.tripleMarsTheme ? 'text-[#00d2ff]' : 'opacity-40'}`}>{((item.value / (state.ebaySalePrice || 1)) * 100).toFixed(1)}%</span>
+                        </div>
+                      </div>
                     ))}
-                  </Pie>
-                  <Tooltip 
-                    content={({ active, payload }) => {
-                      if (active && payload && payload.length) {
-                        const data = payload[0].payload;
-                        const percentage = ((data.value / (state.ebaySalePrice || 1)) * 100).toFixed(1);
-                        return (
-                          <div className={`p-4 rounded-2xl shadow-2xl border font-mono text-[10px] ${state.zapTheme ? 'bg-white border-neutral-100 text-zap-black' : 'bg-white dark:bg-neutral-900 border-neutral-100 dark:border-neutral-800'}`}>
-                            <p className="font-black uppercase tracking-tighter mb-2" style={{ color: state.zapTheme && data.name.includes('Profit') ? '#ff4f00' : data.color }}>{data.name}</p>
-                            <div className="flex justify-between gap-6 opacity-60 mb-1">
-                              <span>AMOUNT:</span>
-                              <span className="font-bold">${data.value.toFixed(2)}</span>
-                            </div>
-                            <div className="flex justify-between gap-6 opacity-60">
-                              <span>PERCENT:</span>
-                              <span className="font-bold">{percentage}%</span>
-                            </div>
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-              
-              {/* Center Label: Profit focus */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className={`text-[9px] font-bold uppercase tracking-widest ${state.zapTheme ? 'text-zap-orange' : state.tripleMarsTheme ? 'text-[#00d2ff]' : 'opacity-30'}`}>Profit</span>
-                <span className={`text-sm font-black tracking-tighter ${state.zapTheme ? 'text-zap-black' : state.tripleMarsTheme ? 'text-[#00d2ff]' : netProfit >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-rose-600 dark:text-rose-400'}`}>
-                  ${netProfit.toFixed(2)}
-                </span>
-              </div>
-            </div>
-            
-            <div className="mt-4 grid grid-cols-1 gap-1">
-              {chartData.map((item, idx) => (
-                <div key={idx} className={`flex items-center justify-between text-[10px] font-mono py-1 border-b border-dashed last:border-0 transition-opacity ${state.zapTheme ? 'border-neutral-100 text-neutral-500 hover:text-zap-black' : state.tripleMarsTheme ? 'border-[#00d2ff]/20 text-slate-600 hover:text-slate-900' : 'border-neutral-200 dark:border-neutral-800 opacity-70 hover:opacity-100'}`}>
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: state.zapTheme && item.name.includes('Profit') ? '#ff4f00' : item.color }} />
-                    <span className="uppercase">{item.name}</span>
                   </div>
-                  <div className="flex gap-3">
-                    <span>${item.value.toFixed(2)}</span>
-                    <span className={`w-10 text-right ${state.tripleMarsTheme ? 'text-[#00d2ff]' : 'opacity-40'}`}>{((item.value / (state.ebaySalePrice || 1)) * 100).toFixed(1)}%</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            {netProfit < 0 && (
-              <div className="mt-4 p-3 bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800 rounded-xl text-center">
-                <p className="text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-widest">
-                  Loss of ${Math.abs(netProfit).toFixed(2)} not shown
-                </p>
-              </div>
-            )}
+                  
+                  {netProfit < 0 && (
+                    <div className="mt-4 p-3 bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800 rounded-xl text-center">
+                      <p className="text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-widest">
+                        Loss of ${Math.abs(netProfit).toFixed(2)} not shown
+                      </p>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </ReceiptCard>
         </div>
 
@@ -888,6 +950,18 @@ ROI:             ${effectiveAmazonCost > 0 ? ((netProfit / effectiveAmazonCost) 
                       <span className={state.zapTheme ? 'text-neutral-500 font-medium' : state.tripleMarsTheme ? 'text-slate-500' : ''}>EBAY SALE PRICE</span>
                       <span className={state.zapTheme ? 'text-zap-black font-bold' : state.tripleMarsTheme ? 'text-slate-900 font-bold' : ''}>${state.ebaySalePrice.toFixed(2)}</span>
                     </div>
+                    {state.ebayDiscountPercent > 0 && (
+                      <div className="flex justify-between items-center text-sm">
+                        <span className={state.zapTheme ? 'text-rose-500 font-medium' : 'text-rose-500'}>DISCOUNT ({state.ebayDiscountPercent}%)</span>
+                        <span className={state.zapTheme ? 'text-rose-500 font-bold' : 'text-rose-500'}>-${ebayDiscountAmount.toFixed(2)}</span>
+                      </div>
+                    )}
+                    {state.ebayDiscountPercent > 0 && (
+                      <div className="flex justify-between items-center text-sm pt-1 border-t border-dashed border-neutral-100">
+                        <span className={state.zapTheme ? 'text-zap-black font-bold' : 'font-bold'}>FINAL PRICE</span>
+                        <span className={state.zapTheme ? 'text-zap-black font-bold' : 'font-bold'}>${effectiveSalePrice.toFixed(2)}</span>
+                      </div>
+                    )}
                   </div>
                   
                   <div className={`space-y-3 text-sm border-b border-dashed pb-6 ${state.zapTheme ? 'border-neutral-100' : state.tripleMarsTheme ? 'border-slate-100' : 'border-neutral-300 dark:border-neutral-700'}`}>

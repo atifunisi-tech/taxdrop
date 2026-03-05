@@ -20,6 +20,9 @@ export interface CalculatorState {
   receiptTheme: boolean;
   tripleMarsTheme: boolean;
   zapTheme: boolean;
+  isAmazonExpanded: boolean;
+  isVisualExpanded: boolean;
+  ebayDiscountPercent: number;
 }
 
 export const DEFAULT_STATE: CalculatorState = {
@@ -42,4 +45,7 @@ export const DEFAULT_STATE: CalculatorState = {
   receiptTheme: false,
   tripleMarsTheme: false,
   zapTheme: true,
+  isAmazonExpanded: true,
+  isVisualExpanded: true,
+  ebayDiscountPercent: 0,
 };
